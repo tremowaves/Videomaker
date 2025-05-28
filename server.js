@@ -183,7 +183,7 @@ async function getVideoDuration(filePath) {
 }
 
 // Core video processing logic
-async function createLoopedVideoWithAudio(inputVideoPath, inputAudioPath, numLoops, outputFileName) {
+async function createLoopedVideoWithAudio(inputVideoPath, inputAudioPath, numLoops, outputFileName, fullHD = false) {
     const absInputVideoPath = path.resolve(inputVideoPath);
     const absInputAudioPath = path.resolve(inputAudioPath);
     const absOutputVideoPath = path.resolve(OUTPUT_DIR, outputFileName);
@@ -252,7 +252,12 @@ async function createLoopedVideoWithAudio(inputVideoPath, inputAudioPath, numLoo
             '-i', absInputAudioPath,        // Input 2: Audio file (absolute path)
             '-map', '0:v:0',              // Map video from input 0 (looped video)
             '-map', '1:a:0',              // Map audio from input 1 (new audio)
-            '-c:v', 'copy',               // Copy video stream
+            '-c:v', fullHD ? 'libx264' : 'copy',  // Re-encode if Full HD is requested
+            ...(fullHD ? [
+                '-vf', 'scale=1920:1080',  // Scale to Full HD
+                '-preset', 'medium',       // Encoding preset (balance between speed and quality)
+                '-crf', '23'              // Constant Rate Factor (lower = better quality, 23 is default)
+            ] : []),
             '-c:a', 'aac',                // Re-encode audio to AAC (common, compatible format)
             '-b:a', '192k',               // Audio bitrate
             '-t', totalLoopedVideoDuration.toFixed(3).toString(), // Set total output duration to match looped video
@@ -330,6 +335,9 @@ app.post('/process-video', upload.fields([
         });
     }
 
+    // Get Full HD option
+    const fullHD = req.body.fullHD === 'true';
+
     // Sanitize original video name for use in output filename
     const originalVideoNameSanitized = path.parse(videoFile.originalname).name.replace(/[^a-zA-Z0-9_.-]/g, '_');
     const outputFileName = `looped_${originalVideoNameSanitized}_${Date.now()}.mp4`;
@@ -339,7 +347,8 @@ app.post('/process-video', upload.fields([
             videoFile.path, // Path to uploaded video in UPLOAD_DIR
             audioFile.path, // Path to uploaded audio in UPLOAD_DIR
             numLoops,
-            outputFileName
+            outputFileName,
+            fullHD // Pass the Full HD option
         );
 
         res.json({

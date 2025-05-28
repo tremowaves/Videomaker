@@ -150,6 +150,12 @@
                 <label for="numLoops">Number of Loops (1-1000):</label>
                 <input type="number" id="numLoops" name="numLoops" value="3" min="1" max="1000" step="1" required>
             </div>
+            <div class="form-group">
+                <label for="fullHD">
+                    <input type="checkbox" id="fullHD" name="fullHD">
+                    Export as Full HD (1920x1080)
+                </label>
+            </div>
             <button type="submit" id="submitButton">Create Looped Video</button>
         </form>
         <div class="progress-bar" id="progressBar">
@@ -214,6 +220,7 @@
             const videoFile = document.getElementById('videoFile').files[0];
             const audioFile = document.getElementById('audioFile').files[0];
             const numLoops = document.getElementById('numLoops').value;
+            const fullHD = document.getElementById('fullHD').checked;
 
             if (!videoFile || !audioFile) {
                 displayMessage('Please select both video and audio files.', 'error');
@@ -236,6 +243,7 @@
             formData.append('videoFile', videoFile);
             formData.append('audioFile', audioFile);
             formData.append('numLoops', numLoops);
+            formData.append('fullHD', fullHD);
 
             try {
                 const response = await fetch('/process-video', {
