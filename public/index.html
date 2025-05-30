@@ -228,12 +228,6 @@
                 return;
             }
 
-            if (videoFile.size > 500 * 1024 * 1024 || audioFile.size > 500 * 1024 * 1024) {
-                displayMessage('File size too large. Maximum size is 500MB.', 'error');
-                resetForm();
-                return;
-            }
-
             if (parseInt(numLoops) <= 0 || parseInt(numLoops) > 1000) {
                 displayMessage('Number of loops must be between 1 and 1000.', 'error');
                 resetForm();

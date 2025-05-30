@@ -57,10 +57,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
     storage: storage,
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: MAX_FILE_SIZE
-    }
+    fileFilter: fileFilter
 });
 
 // Serve static files from 'public' directory (e.g., if you add CSS or client-side JS)
